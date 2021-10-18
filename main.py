@@ -1,5 +1,6 @@
 from fastapi import FastAPI, WebSocket
 from fastapi.responses import HTMLResponse
+import json
 
 app = FastAPI()
 
@@ -22,7 +23,9 @@ html = """
             ws.onmessage = function(event) {
                 var messages = document.getElementById('messages')
                 var message = document.createElement('li')
-                var content = document.createTextNode(event.data)
+                console.log(event.data)
+                const obj = JSON.parse(event.data)
+                var content = document.createTextNode(obj.message)
                 message.appendChild(content)
                 messages.appendChild(message)
             };
@@ -47,4 +50,5 @@ async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     while True:
         data = await websocket.receive_text()
-        await websocket.send_text(f"{data}")
+        jsn = json.dumps({"message": f"{data}"})
+        await websocket.send_text(jsn)
